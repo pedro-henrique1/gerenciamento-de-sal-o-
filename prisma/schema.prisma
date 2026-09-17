@@ -1,3 +1,12 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
 enum NivelAcesso {
   GERENTE
   FUNCIONARIO
@@ -47,7 +56,7 @@ model Servico {
   id             String        @id @default(uuid())
   nome           String
   descricao      String?
-  precoPadrao    Float
+  precoPadrao    Decimal       @db.Decimal(10, 2)
   duracaoMinutos Int
   agendamentos   Agendamento[]
 }
@@ -76,7 +85,7 @@ model Atendimento {
 
 model Pagamento {
   id             String         @id @default(uuid())
-  valorFinal     Float
+  valorFinal     Decimal        @db.Decimal(10, 2)
   formaPagamento FormaPagamento
   dataPagamento  DateTime       @default(now())
   atendimentoId  String         @unique

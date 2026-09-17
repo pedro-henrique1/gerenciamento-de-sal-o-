@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body } from '@nestjs/common';
+import { Controller, Get, Post, Body, Query } from '@nestjs/common';
 import { PagamentoService } from './pagamento.service';
 import { CreatePagamentoDto } from './dto/create-pagamento.dto';
 
@@ -12,7 +12,7 @@ export class PagamentoController {
   }
 
   @Get()
-  findAll() {
-    return this.pagamentoService.findAll();
+  findAll(@Query() query: Record<string, string>) {
+    return this.pagamentoService.findAll(query);
   }
 }

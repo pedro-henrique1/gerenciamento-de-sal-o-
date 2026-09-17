@@ -9,6 +9,7 @@ import { ProfissionalModule } from './profissional/profissional.module';
 import { ServicoModule } from './servico/servico.module';
 import { AtendimentoModule } from './atendimento/atendimento.module';
 import { PagamentoModule } from './pagamento/pagamento.module';
+import { AuthModule } from './auth/auth.module';
 
 export const { ObserveModule, ObserveInstrument } = createObserveModule();
 
@@ -26,6 +27,7 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule();
     ServicoModule,
     AtendimentoModule,
     PagamentoModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],

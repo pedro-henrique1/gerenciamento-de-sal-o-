@@ -1,4 +1,4 @@
-import { IsEnum, IsNotEmpty, IsNumber, IsUUID } from 'class-validator';
+import { IsEnum, IsNotEmpty, IsNumber, IsPositive, IsUUID } from 'class-validator';
 import { FormaPagamento } from '@prisma/client';
 
 export class CreatePagamentoDto {
@@ -8,6 +8,7 @@ export class CreatePagamentoDto {
 
   @IsNumber({}, { message: 'O valor final deve ser um número válido.' })
   @IsNotEmpty({ message: 'O valor final é obrigatório.' })
+  @IsPositive({ message: 'O valor final deve ser maior que zero.' })
   valorFinal: number;
 
   @IsEnum(FormaPagamento, { message: 'A forma de pagamento deve ser PIX, CARTAO ou DINHEIRO.' })

@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import { CreateAtendimentoDto } from './dto/create-atendimento.dto';
 import { PrismaService } from '../prisma/prisma.service';
+import { getPagination } from '../common/pagination';
 
 @Injectable()
 export class AtendimentoService {
@@ -39,8 +40,13 @@ export class AtendimentoService {
     return resultadoAtendimento;
   }
 
-  async findAll() {
-    return this.prisma.atendimento.findMany({
+  async findAll(query: Record<string, string> = {}) {
+    const { page, limit, skip } = getPagination(Number(query.page), Number(query.limit));
+    const [items, total] = await this.prisma.$transaction([
+      this.prisma.atendimento.findMany({
+        skip,
+        take: limit,
+        orderBy: { dataConclusao: 'desc' },
       include: {
         agendamento: {
           include: {
@@ -51,6 +57,9 @@ export class AtendimentoService {
         },
         pagamento: true, 
       },
-    });
+      }),
+      this.prisma.atendimento.count(),
+    ]);
+    return { items, page, limit, total, totalPages: Math.ceil(total / limit) };
   }
 }

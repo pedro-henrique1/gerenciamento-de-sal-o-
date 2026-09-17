@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateServicoDto } from './dto/create-servico.dto';
 import { UpdateServicoDto } from './dto/update-servico.dto';
 import { PrismaService } from '../prisma/prisma.service';
+import { getPagination } from '../common/pagination';
 
 @Injectable()
 export class ServicoService {
@@ -13,8 +14,14 @@ export class ServicoService {
     });
   }
 
-  async findAll() {
-    return this.prisma.servico.findMany();
+  async findAll(query: Record<string, string> = {}) {
+    const { page, limit, skip } = getPagination(Number(query.page), Number(query.limit));
+    const where = query.nome ? { nome: { contains: query.nome, mode: 'insensitive' as const } } : {};
+    const [items, total] = await this.prisma.$transaction([
+      this.prisma.servico.findMany({ where, skip, take: limit, orderBy: { nome: 'asc' } }),
+      this.prisma.servico.count({ where }),
+    ]);
+    return { items, page, limit, total, totalPages: Math.ceil(total / limit) };
   }
 
   async findOne(id: string) {

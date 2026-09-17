@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateProfissionalDto } from './dto/create-profissional.dto';
 import { UpdateProfissionalDto } from './dto/update-profissional.dto';
 import { PrismaService } from '../prisma/prisma.service';
+import { getPagination } from '../common/pagination';
 
 @Injectable()
 export class ProfissionalService {
@@ -13,8 +14,14 @@ export class ProfissionalService {
     });
   }
 
-  async findAll() {
-    return this.prisma.profissional.findMany();
+  async findAll(query: Record<string, string> = {}) {
+    const { page, limit, skip } = getPagination(Number(query.page), Number(query.limit));
+    const where = query.ativo === undefined ? {} : { ativo: query.ativo === 'true' };
+    const [items, total] = await this.prisma.$transaction([
+      this.prisma.profissional.findMany({ where, skip, take: limit, orderBy: { nome: 'asc' } }),
+      this.prisma.profissional.count({ where }),
+    ]);
+    return { items, page, limit, total, totalPages: Math.ceil(total / limit) };
   }
 
   async findOne(id: string) {
