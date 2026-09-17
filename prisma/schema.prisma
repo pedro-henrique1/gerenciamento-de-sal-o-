@@ -1,10 +1,84 @@
-generator client {
-  provider = "prisma-client-js"
+enum NivelAcesso {
+  GERENTE
+  FUNCIONARIO
 }
 
-datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+enum StatusAgendamento {
+  PENDENTE
+  CONCLUIDO
+  CANCELADO
 }
 
-// Adicione aqui as entidades do diagrama de classes.
+enum FormaPagamento {
+  PIX
+  CARTAO
+  DINHEIRO
+}
+
+model Usuario {
+  id           String        @id @default(uuid())
+  email        String        @unique
+  senhaHash    String
+  nivelAcesso  NivelAcesso
+  profissional Profissional?
+}
+
+model Cliente {
+  id           String        @id @default(uuid())
+  nome         String
+  telefone     String        @unique
+  email        String?
+  dataCadastro DateTime      @default(now())
+  agendamentos Agendamento[]
+}
+
+model Profissional {
+  id            String        @id @default(uuid())
+  nome          String
+  telefone      String
+  especialidade String
+  ativo         Boolean       @default(true)
+  usuarioId     String?       @unique
+  usuario       Usuario?      @relation(fields: [usuarioId], references: [id])
+  agendamentos  Agendamento[]
+}
+
+model Servico {
+  id             String        @id @default(uuid())
+  nome           String
+  descricao      String?
+  precoPadrao    Float
+  duracaoMinutos Int
+  agendamentos   Agendamento[]
+}
+
+model Agendamento {
+  id              String            @id @default(uuid())
+  dataHoraReserva DateTime
+  status          StatusAgendamento @default(PENDENTE)
+  clienteId       String
+  cliente         Cliente           @relation(fields: [clienteId], references: [id])
+  profissionalId  String
+  profissional    Profissional      @relation(fields: [profissionalId], references: [id])
+  servicoId       String
+  servico         Servico           @relation(fields: [servicoId], references: [id])
+  atendimento     Atendimento?
+}
+
+model Atendimento {
+  id            String      @id @default(uuid())
+  dataConclusao DateTime    @default(now())
+  observacoes   String?
+  agendamentoId String      @unique
+  agendamento   Agendamento @relation(fields: [agendamentoId], references: [id])
+  pagamento     Pagamento?
+}
+
+model Pagamento {
+  id             String         @id @default(uuid())
+  valorFinal     Float
+  formaPagamento FormaPagamento
+  dataPagamento  DateTime       @default(now())
+  atendimentoId  String         @unique
+  atendimento    Atendimento    @relation(fields: [atendimentoId], references: [id])
+}
