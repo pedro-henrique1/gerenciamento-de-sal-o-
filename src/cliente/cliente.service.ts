@@ -41,6 +41,16 @@ export class ClienteService {
   async findOne(id: string) { 
     const cliente = await this.prisma.cliente.findUnique({
       where: { id },
+      include: {
+        agendamentos: {
+          orderBy: { dataHoraReserva: 'desc' },
+          include: {
+            servico: true,
+            profissional: true,
+            atendimento: true,
+          },
+        },
+      },
     });
 
     if (!cliente) {

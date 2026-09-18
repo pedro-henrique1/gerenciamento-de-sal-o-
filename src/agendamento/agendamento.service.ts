@@ -66,6 +66,9 @@ export class AgendamentoService {
     if (agendamento.status !== 'PENDENTE') {
       throw new ConflictException('Somente agendamentos pendentes podem ser cancelados.');
     }
+    if (agendamento.dataHoraReserva.getTime() <= Date.now()) {
+      throw new ConflictException('Não é possível cancelar um agendamento após o horário do serviço.');
+    }
     return this.prisma.agendamento.update({ where: { id }, data: { status: 'CANCELADO' } });
   }
 
@@ -96,7 +99,7 @@ export class AgendamentoService {
     const agendamentos = await this.prisma.agendamento.findMany({
       where: {
         profissionalId,
-        status: { not: 'CANCELADO' },
+        status: 'PENDENTE',
         ...(ignorarId ? { id: { not: ignorarId } } : {}),
         dataHoraReserva: { lt: fim },
       },

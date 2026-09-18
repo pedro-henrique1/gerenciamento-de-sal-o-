@@ -8,6 +8,8 @@ async function bootstrap() {
     instrument: ObserveInstrument,
   });
 
+  app.enableCors();
+  
   app.useGlobalPipes(
     new ValidationPipe({
       transform: true,
